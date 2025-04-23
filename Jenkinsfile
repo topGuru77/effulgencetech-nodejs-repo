@@ -8,7 +8,7 @@ pipeline{
 
 	agent any
 
-	//rename the user name michaelgwei86 with the username of your dockerhub repo
+	//rename the user name topg528 with the username of your dockerhub repo
 	environment {
 		DOCKERHUB_CREDENTIALS=credentials('DOCKERHUB_CREDENTIALS')
 		IMAGE_REPO_NAME = "topg528/effulgencetech-nodejs-img"
@@ -47,8 +47,8 @@ pipeline{
 		stage('Build-Container') {
 
 			steps {
-				//sh 'docker run --name effulgencetech-node-cont-$BUILD_NUMBER -p 8082:8080 -d topg528/effulgencetech-nodejs-image:$BUILD_NUMBER'
-				sh 'docker run --name $CONTAINER_NAME-$BUILD_NUMBER -p 8089:8080 -d $IMAGE_REPO_NAME:$BUILD_NUMBER'
+				//sh 'docker run --name effulgencetech-node-cont-$BUILD_NUMBER -p 8088:8080 -d topg528/effulgencetech-nodejs-image:$BUILD_NUMBER'
+				sh 'docker run --name $CONTAINER_NAME-$BUILD_NUMBER -p 8088:8080 -d $IMAGE_REPO_NAME:$BUILD_NUMBER'
 				sh 'docker ps'
 			}
 		}
