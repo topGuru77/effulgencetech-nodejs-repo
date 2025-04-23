@@ -47,8 +47,15 @@ pipeline{
 		stage('Build-Container') {
 
 			steps {
-				//sh 'docker run --name effulgencetech-node-cont-$BUILD_NUMBER -p 8087:8080 -d topg528/effulgencetech-nodejs-image:$BUILD_NUMBER'
-				sh 'docker run --name $CONTAINER_NAME-$BUILD_NUMBER -p 8087:8080 -d $IMAGE_REPO_NAME:$BUILD_NUMBER'
+				script {
+					def port = sh(script: '''
+						comm -23 <(seq 8000 9000) <(ss -Htan | awk '{print $4}' | cut -d: -f2 | sort -n | uniq) | shuf | head -n 1
+					''', returnStdout: true).trim()
+
+					env.DYNAMIC_PORT = port
+				}
+
+				sh 'docker run --name $CONTAINER_NAME$BUILD_NUMBER -p ${env.DYNAMIC_PORT}:8080 -d $IMAGE_REPO_NAME:$BUILD_NUMBER'
 				sh 'docker ps'
 			}
 		}
