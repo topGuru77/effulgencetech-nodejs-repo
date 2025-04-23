@@ -44,21 +44,31 @@ pipeline{
 		}
 
 //Building and tagging our Docker container
-		stage('Build-Container') {
+stage('Build-Container') {
+    steps {
+        script {
+            def port = sh(
+                script: '''
+                used_ports=$(ss -Htan | awk '{print $4}' | cut -d: -f2 | sort -n | uniq)
+                free_port=$(comm -23 <(seq 8000 9000 | sort -n) <(echo "$used_ports") | shuf | head -n 1)
+                echo $free_port
+                ''',
+                returnStdout: true
+            ).trim()
+            
+            echo "Selected free port: ${port}"
 
-			steps {
-				script {
-					def port = sh(script: '''
-						comm -23 <(seq 8000 9000) <(ss -Htan | awk '{print $4}' | cut -d: -f2 | sort -n | uniq) | shuf | head -n 1
-					''', returnStdout: true).trim()
+            // Save port to environment variable if needed
+            env.DYNAMIC_PORT = port
 
-					env.DYNAMIC_PORT = port
-				}
+            // Run your Docker container with dynamic port
+            sh """
+            docker run --name effulgencetech-nodejs-cont-${BUILD_NUMBER} -p $DYNAMIC_PORT:8080 -d topg528/effulgencetech-nodejs-img:13
+            """
+        }
+    }
+}
 
-				sh 'docker run --name $CONTAINER_NAME$BUILD_NUMBER -p ${env.DYNAMIC_PORT}:8080 -d $IMAGE_REPO_NAME:$BUILD_NUMBER'
-				sh 'docker ps'
-			}
-		}
 
 //Pushing the image to the docker
 
